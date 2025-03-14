@@ -28,14 +28,14 @@ def get_professor(id):
     professor = next((p for p in professores if p['id'] == id), None)
     if professor:
         return jsonify(professor)
-    return jsonify({"erro": "professor nao encontrado"}), 400
+    return jsonify({"erro": "professor nao encontrado"}), 404
 
 @app.route('/professores/<int:id>', methods=['PUT'])
 def update_professor(id):
     data = request.get_json()
     professor = next((p for p in professores if p['id'] == id), None)
     if professor is None:
-        return jsonify({"erro": "professor nao encontrado"}), 400
+        return jsonify({"erro": "professor nao encontrado"}), 404
     if 'nome' not in data:
         return jsonify({"erro": "professor sem nome"}), 400
     professor.update(data)
@@ -45,7 +45,7 @@ def update_professor(id):
 def delete_professor(id):
     global professores
     if not any(p['id'] == id for p in professores):
-        return jsonify({"erro": "professor nao encontrado"}), 400
+        return jsonify({"erro": "professor nao encontrado"}), 404
     professores = [p for p in professores if p['id'] != id]
     return jsonify({"message": "Professor deletado com sucesso"})
 
@@ -57,6 +57,10 @@ def get_turmas():
 @app.route('/turmas', methods=['POST'])
 def add_turma():
     data = request.get_json()
+    if 'descricao' not in data:
+        return jsonify({"erro": "turma sem descricao"}), 400
+    if any(t['id'] == data['id'] for t in turmas):
+        return jsonify({"erro": "id ja utilizada"}), 400
     turmas.append(data)
     return jsonify(data), 201
 
@@ -75,14 +79,6 @@ def update_turma(id):
         turma.update(data)
         return jsonify(turma)
     return jsonify({"message": "Turma não encontrada"}), 404
-
-@app.route('/reseta', methods=['POST'])
-def reseta_dados():
-    global professores, turmas, alunos
-    professores = []
-    turmas = []
-    alunos = []
-    return jsonify({"message": "Todos os dados foram resetados com sucesso"}), 200
 
 @app.route('/turmas/<int:id>', methods=['DELETE'])
 def delete_turma(id):
@@ -103,7 +99,7 @@ def add_aluno():
     if any(a['id'] == data['id'] for a in alunos):
         return jsonify({"erro": "id ja utilizada"}), 400
     alunos.append(data)
-    return jsonify(data), 200
+    return jsonify(data), 201
 
 @app.route('/alunos/<int:id>', methods=['GET'])
 def get_aluno(id):
@@ -130,6 +126,14 @@ def delete_aluno(id):
         return jsonify({"erro": "aluno nao encontrado"}), 404
     alunos = [a for a in alunos if a['id'] != id]
     return jsonify({"message": "Aluno deletado com sucesso"})
+
+@app.route('/reseta', methods=['POST'])
+def reseta_dados():
+    global professores, turmas, alunos
+    professores = []
+    turmas = []
+    alunos = []
+    return jsonify({"message": "Todos os dados foram resetados com sucesso"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
