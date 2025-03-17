@@ -1,14 +1,15 @@
 from flask import Flask, jsonify, request
 
-# Inicializa a aplicação Flask
 app = Flask(__name__)
 
-# Listas para armazenar os dados temporariamente (simulando um banco de dados)
 professores = []
 turmas = []
 alunos = []
 
-# Endpoints CRUD para Professores
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({"message": "Bem-vindo à API!"}), 200
+
 @app.route('/professores', methods=['GET'])
 def get_professores():
     return jsonify(professores)
@@ -49,7 +50,6 @@ def delete_professor(id):
     professores = [p for p in professores if p['id'] != id]
     return jsonify({"message": "Professor deletado com sucesso"})
 
-# Endpoints CRUD para Turmas
 @app.route('/turmas', methods=['GET'])
 def get_turmas():
     return jsonify(turmas)
@@ -86,7 +86,6 @@ def delete_turma(id):
     turmas = [t for t in turmas if t['id'] != id]
     return jsonify({"message": "Turma deletada com sucesso"})
 
-# Endpoints CRUD para Alunos
 @app.route('/alunos', methods=['GET'])
 def get_alunos():
     return jsonify(alunos)
