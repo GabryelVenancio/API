@@ -1,10 +1,18 @@
 from flask import Flask, jsonify, request
+from datetime import datetime
 
 app = Flask(__name__)
 
 professores = []
 turmas = []
 alunos = []
+
+def validar_data(data_str):
+    try:
+        datetime.strptime(data_str, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
 
 @app.route('/', methods=['GET'])
 def home():
@@ -63,6 +71,8 @@ def add_turma():
         return jsonify({"erro": "turma sem descricao"}), 400
     if 'professor_id' not in data or not any(p['id'] == data['professor_id'] for p in professores):
         return jsonify({"erro": "professor nao encontrado"}), 400
+    if 'ativo' not in data or not isinstance(data['ativo'], bool):
+        return jsonify({"erro": "campo 'ativo' ausente ou invalido"}), 400
     if any(t['id'] == data['id'] for t in turmas):
         return jsonify({"erro": "id ja utilizada"}), 400
     turmas.append(data)
@@ -73,16 +83,18 @@ def get_turma(id):
     turma = next((t for t in turmas if t['id'] == id), None)
     if turma:
         return jsonify(turma)
-    return jsonify({"message": "Turma não encontrada"}), 404
+    return jsonify({"erro": "Turma não encontrada"}), 404
 
 @app.route('/turmas/<int:id>', methods=['PUT'])
 def update_turma(id):
     data = request.get_json()
     turma = next((t for t in turmas if t['id'] == id), None)
     if turma:
+        if 'professor_id' in data and not any(p['id'] == data['professor_id'] for p in professores):
+            return jsonify({"erro": "professor nao encontrado"}), 400
         turma.update(data)
         return jsonify(turma)
-    return jsonify({"message": "Turma não encontrada"}), 404
+    return jsonify({"erro": "Turma não encontrada"}), 404
 
 @app.route('/turmas/<int:id>', methods=['DELETE'])
 def delete_turma(id):
@@ -101,6 +113,10 @@ def add_aluno():
         return jsonify({"erro": "aluno sem nome"}), 400
     if 'idade' not in data or data['idade'] <= 0:
         return jsonify({"erro": "idade invalida"}), 400
+    if 'data_nascimento' not in data or not validar_data(data['data_nascimento']):
+        return jsonify({"erro": "data de nascimento invalida ou ausente"}), 400
+    if 'nota_primeiro_semestre' in data and 'nota_segundo_semestre' in data:
+        data['media_final'] = (data['nota_primeiro_semestre'] + data['nota_segundo_semestre']) / 2
     if any(a['id'] == data['id'] for a in alunos):
         return jsonify({"erro": "id ja utilizada"}), 400
     alunos.append(data)
@@ -121,6 +137,10 @@ def update_aluno(id):
         return jsonify({"erro": "aluno nao encontrado"}), 404
     if 'nome' not in data:
         return jsonify({"erro": "aluno sem nome"}), 400
+    if 'data_nascimento' in data and not validar_data(data['data_nascimento']):
+        return jsonify({"erro": "data de nascimento invalida"}), 400
+    if 'nota_primeiro_semestre' in data and 'nota_segundo_semestre' in data:
+        data['media_final'] = (data['nota_primeiro_semestre'] + data['nota_segundo_semestre']) / 2
     aluno.update(data)
     return jsonify(aluno)
 
