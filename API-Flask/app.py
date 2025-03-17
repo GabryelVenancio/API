@@ -19,6 +19,8 @@ def add_professor():
     data = request.get_json()
     if 'nome' not in data:
         return jsonify({"erro": "professor sem nome"}), 400
+    if 'idade' not in data or data['idade'] <= 0:
+        return jsonify({"erro": "idade invalida"}), 400
     if any(p['id'] == data['id'] for p in professores):
         return jsonify({"erro": "id ja utilizada"}), 400
     professores.append(data)
@@ -59,6 +61,8 @@ def add_turma():
     data = request.get_json()
     if 'descricao' not in data:
         return jsonify({"erro": "turma sem descricao"}), 400
+    if 'professor_id' not in data or not any(p['id'] == data['professor_id'] for p in professores):
+        return jsonify({"erro": "professor nao encontrado"}), 400
     if any(t['id'] == data['id'] for t in turmas):
         return jsonify({"erro": "id ja utilizada"}), 400
     turmas.append(data)
@@ -95,6 +99,8 @@ def add_aluno():
     data = request.get_json()
     if 'nome' not in data:
         return jsonify({"erro": "aluno sem nome"}), 400
+    if 'idade' not in data or data['idade'] <= 0:
+        return jsonify({"erro": "idade invalida"}), 400
     if any(a['id'] == data['id'] for a in alunos):
         return jsonify({"erro": "id ja utilizada"}), 400
     alunos.append(data)
