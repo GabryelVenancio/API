@@ -63,7 +63,11 @@ E aperte a tecla `Enter`
 4. Envie suas alterações locais para o repositório remoto:
 
 ```bash
+Develop
 git push <remote_url> <branch_Develop>
+
+git push <remote_url> <branch_principal>
+main
 ```
 
 E aperte a tecla `Enter`
