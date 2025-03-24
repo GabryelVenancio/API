@@ -115,6 +115,8 @@ def add_aluno():
         return jsonify({"erro": "idade invalida"}), 400
     if 'data_nascimento' not in data or not validar_data(data['data_nascimento']):
         return jsonify({"erro": "data de nascimento invalida ou ausente"}), 400
+    if 'turma_id' not in data or not any(t['id'] == data['turma_id'] for t in turmas):
+        return jsonify({"erro": "turma nao encontrada"}), 400
     if 'nota_primeiro_semestre' in data and 'nota_segundo_semestre' in data:
         data['media_final'] = (data['nota_primeiro_semestre'] + data['nota_segundo_semestre']) / 2
     if any(a['id'] == data['id'] for a in alunos):
@@ -139,9 +141,16 @@ def update_aluno(id):
         return jsonify({"erro": "aluno sem nome"}), 400
     if 'data_nascimento' in data and not validar_data(data['data_nascimento']):
         return jsonify({"erro": "data de nascimento invalida"}), 400
-    if 'nota_primeiro_semestre' in data and 'nota_segundo_semestre' in data:
-        data['media_final'] = (data['nota_primeiro_semestre'] + data['nota_segundo_semestre']) / 2
+    if 'turma_id' in data and not any(t['id'] == data['turma_id'] for t in turmas):
+        return jsonify({"erro": "turma nao encontrada"}), 400
+    
     aluno.update(data)
+    
+    if 'nota_primeiro_semestre' in data or 'nota_segundo_semestre' in data:
+        nota1 = data.get('nota_primeiro_semestre', aluno.get('nota_primeiro_semestre', 0))
+        nota2 = data.get('nota_segundo_semestre', aluno.get('nota_segundo_semestre', 0))
+        aluno['media_final'] = (nota1 + nota2) / 2
+    
     return jsonify(aluno)
 
 @app.route('/alunos/<int:id>', methods=['DELETE'])
@@ -151,6 +160,31 @@ def delete_aluno(id):
         return jsonify({"erro": "aluno nao encontrado"}), 404
     alunos = [a for a in alunos if a['id'] != id]
     return jsonify({"message": "Aluno deletado com sucesso"})
+
+@app.route('/turmas/<int:turma_id>/alunos', methods=['GET'])
+def get_alunos_por_turma(turma_id):
+    if not any(t['id'] == turma_id for t in turmas):
+        return jsonify({"erro": "turma nao encontrada"}), 404
+    alunos_turma = [a for a in alunos if a.get('turma_id') == turma_id]
+    return jsonify(alunos_turma)
+
+@app.route('/professores/<int:professor_id>/turmas', methods=['GET'])
+def get_turmas_por_professor(professor_id):
+    if not any(p['id'] == professor_id for p in professores):
+        return jsonify({"erro": "professor nao encontrado"}), 404
+    turmas_professor = [t for t in turmas if t.get('professor_id') == professor_id]
+    return jsonify(turmas_professor)
+
+@app.route('/professores/<int:professor_id>/alunos', methods=['GET'])
+def get_alunos_por_professor(professor_id):
+    if not any(p['id'] == professor_id for p in professores):
+        return jsonify({"erro": "professor nao encontrado"}), 404
+    
+    turmas_professor = [t['id'] for t in turmas if t.get('professor_id') == professor_id]
+    
+    alunos_professor = [a for a in alunos if a.get('turma_id') in turmas_professor]
+    
+    return jsonify(alunos_professor)
 
 @app.route('/reseta', methods=['POST'])
 def reseta_dados():
