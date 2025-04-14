@@ -11,5 +11,13 @@ app.register_blueprint(alunos_bp, url_prefix='/alunos')
 app.register_blueprint(professores_bp, url_prefix='/professores')
 app.register_blueprint(turmas_bp, url_prefix='/turmas')
 
+
+@app.route('/')
+def home():
+    return {
+        "mensagem": "Bem-vindo à API!",
+        "rotas_disponiveis": ["/alunos", "/professores", "/turmas"]
+    }
+
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], port=app.config['PORT'], debug=app.config['DEBUG'])
