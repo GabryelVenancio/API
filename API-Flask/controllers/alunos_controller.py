@@ -3,11 +3,11 @@ from models.alunos.alunos import criar_aluno, listar_alunos, buscar_aluno_por_id
 
 alunos_bp = Blueprint('alunos', __name__)
 
-@alunos_bp.route('/alunos', methods=['GET'])
+@alunos_bp.route('/', methods=['GET'])
 def get_alunos():
     return jsonify(listar_alunos())
 
-@alunos_bp.route('/alunos', methods=['POST'])
+@alunos_bp.route('/', methods=['POST'])
 def add_aluno():
     data = request.get_json()
     if 'nome' not in data:
@@ -15,14 +15,14 @@ def add_aluno():
     aluno = criar_aluno(data['nome'])
     return jsonify(aluno), 201
 
-@alunos_bp.route('/alunos/<int:id>', methods=['GET'])
+@alunos_bp.route('/<int:id>', methods=['GET'])
 def get_aluno(id):
     aluno = buscar_aluno_por_id(id)
     if aluno:
         return jsonify(aluno)
     return jsonify({"erro": "Aluno não encontrado"}), 404
 
-@alunos_bp.route('/alunos/<int:id>', methods=['PUT'])
+@alunos_bp.route('/<int:id>', methods=['PUT'])
 def update_aluno(id):
     data = request.get_json()
     aluno = buscar_aluno_por_id(id)
@@ -31,7 +31,7 @@ def update_aluno(id):
         return jsonify(aluno)
     return jsonify({"erro": "Aluno não encontrado"}), 404
 
-@alunos_bp.route('/alunos/<int:id>', methods=['DELETE'])
+@alunos_bp.route('/<int:id>', methods=['DELETE'])
 def delete_aluno(id):
     global alunos
     alunos = [a for a in alunos if a['id'] != id]

@@ -5,11 +5,11 @@ from models.alunos.alunos import listar_alunos
 
 turmas_bp = Blueprint('turmas', __name__)
 
-@turmas_bp.route('/turmas', methods=['GET'])
+@turmas_bp.route('/', methods=['GET'])
 def get_turmas():
     return jsonify(listar_turmas())
 
-@turmas_bp.route('/turmas', methods=['POST'])
+@turmas_bp.route('/', methods=['POST'])
 def add_turma():
     data = request.get_json()
     if 'nome' not in data:
@@ -19,14 +19,14 @@ def add_turma():
     turma = criar_turma(data['nome'])
     return jsonify(turma), 201
 
-@turmas_bp.route('/turmas/<int:id>', methods=['GET'])
+@turmas_bp.route('/<int:id>', methods=['GET'])
 def get_turma(id):
     turma = buscar_turma_por_id(id)
     if turma:
         return jsonify(turma)
     return jsonify({"erro": "Turma não encontrada"}), 404
 
-@turmas_bp.route('/turmas/<int:id>', methods=['PUT'])
+@turmas_bp.route('/<int:id>', methods=['PUT'])
 def update_turma(id):
     data = request.get_json()
     turma = buscar_turma_por_id(id)
@@ -35,13 +35,13 @@ def update_turma(id):
         return jsonify(turma)
     return jsonify({"erro": "Turma não encontrada"}), 404
 
-@turmas_bp.route('/turmas/<int:id>', methods=['DELETE'])
+@turmas_bp.route('/<int:id>', methods=['DELETE'])
 def delete_turma(id):
     global turmas
     turmas = [t for t in turmas if t['id'] != id]
     return jsonify({"message": "Turma deletada com sucesso"})
 
-@turmas_bp.route('/turmas/<int:turma_id>/alunos', methods=['GET'])
+@turmas_bp.route('/<int:turma_id>/alunos', methods=['GET'])
 def get_alunos_por_turma(turma_id):
     turma = buscar_turma_por_id(turma_id)
     if turma:
