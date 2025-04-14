@@ -18,7 +18,7 @@ def test_add_aluno(self):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(json.loads(response.data), {"erro": "aluno sem nome"})
 
-    def test_get_aluno(self):
+def test_get_aluno(self):
         time.sleep(1)
         novo_professor = {"id": 1, "nome": "Maria Oliveira", "idade": 38, "materia": "Química", "observacoes": "Especialista em química orgânica"}
         self.app.post('/professores', data=json.dumps(novo_professor), content_type='application/json')
@@ -35,7 +35,7 @@ def test_add_aluno(self):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(json.loads(response.data), {"erro": "aluno nao encontrado"})
 
-    def test_get_all_alunos(self):
+def test_get_all_alunos(self):
         time.sleep(1)
         response = self.app.get('/alunos')
         self.assertEqual(response.status_code, 200)
@@ -51,7 +51,7 @@ def test_add_aluno(self):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(json.loads(response.data)), 1)
 
-    def test_update_aluno(self):
+def test_update_aluno(self):
         time.sleep(1)
         novo_professor = {"id": 1, "nome": "Carlos Souza", "idade": 45, "materia": "Biologia", "observacoes": "Professor renomado"}
         self.app.post('/professores', data=json.dumps(novo_professor), content_type='application/json')
@@ -69,7 +69,7 @@ def test_add_aluno(self):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(json.loads(response.data), {"erro": "aluno nao encontrado"})
 
-    def test_delete_aluno(self):
+def test_delete_aluno(self):
         time.sleep(1)
         novo_professor = {"id": 1, "nome": "Ana Costa", "idade": 50, "materia": "Física", "observacoes": "Deixa saudades"}
         self.app.post('/professores', data=json.dumps(novo_professor), content_type='application/json')
