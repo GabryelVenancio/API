@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-=======
+
 from flask import Flask, jsonify, request
 from datetime import datetime
 
@@ -199,24 +198,20 @@ def reseta_dados():
 if __name__ == '__main__':
     app.run(debug=True)
 
->>>>>>> 404414ebaed6bc112fa199b8b2c271353e5ed4a0
 from flask import Flask
 from controllers.alunos_controller import aluno_bp
 from controllers.professores_controller import professor_bp
 from controllers.turmas_controller import turma_bp
-<<<<<<< HEAD
-=======
+
 from controllers.reset_controller import reset_bp
->>>>>>> 404414ebaed6bc112fa199b8b2c271353e5ed4a0
+
 from config import db
 from flasgger import Swagger
 
 app = Flask(__name__)
 
-<<<<<<< HEAD
-# Configurações da aplicação
-=======
->>>>>>> 404414ebaed6bc112fa199b8b2c271353e5ed4a0
+
+
 app.config['PORT'] = 5000
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -226,29 +221,29 @@ app.config['SWAGGER'] = {
     "uiversion": 3
 }
 
-<<<<<<< HEAD
-# Inicialização do banco e documentação
+
 db.init_app(app)
 swagger = Swagger(app)
 
-# Registro dos blueprints
-app.register_blueprint(aluno_bp, url_prefix="/alunos")
-app.register_blueprint(professor_bp, url_prefix="/professores")
-app.register_blueprint(turma_bp, url_prefix="/turmas")
-=======
-db.init_app(app)
-swagger = Swagger(app)
 
 app.register_blueprint(aluno_bp, url_prefix="/alunos")
 app.register_blueprint(professor_bp, url_prefix="/professores")
 app.register_blueprint(turma_bp, url_prefix="/turmas")
+
+db.init_app(app)
+swagger = Swagger(app)
+
+
+app.register_blueprint(aluno_bp, url_prefix="/alunos")
+app.register_blueprint(professor_bp, url_prefix="/professores")
+app.register_blueprint(turma_bp, url_prefix="/turmas")
+
 app.register_blueprint(reset_bp)  
->>>>>>> 404414ebaed6bc112fa199b8b2c271353e5ed4a0
 
-# Rota principal estilizada
+
+
 @app.route('/')
 def home():
-<<<<<<< HEAD
     return '''
         <!DOCTYPE html>
         <html lang="pt-br">
@@ -313,26 +308,25 @@ def home():
         </html>
     '''
 
-# Rota de teste
-@app.route('/teste', methods=['GET'])
 def teste():
     return {"message": "Tudo está funcionando corretamente!"}
 
-# Criação das tabelas antes do primeiro uso
+
 with app.app_context():
     db.create_all()
 
-# Inicialização da aplicação
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
-=======
+
     return '🚀 Bem-vindo à API DevAPI! Acesse a documentação Swagger em /apidocs/'
 
 
 with app.app_context():
     db.create_all()
 
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
 
->>>>>>> 404414ebaed6bc112fa199b8b2c271353e5ed4a0
+    app.run(host='0.0.0.0', port=5000, debug=True)
