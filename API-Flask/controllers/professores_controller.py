@@ -1,138 +1,46 @@
-from flask import Blueprint, jsonify, request
-from models.professores.professores import criar_professor, listar_professores, buscar_professor_por_id
+from flask import Blueprint, request, jsonify
+from models.professores import (
+    criar_professor, listar_professores, buscar_professor_por_id,
+    atualizar_professor, deletar_professor
+)
+from flasgger import swag_from
 
-professores_bp = Blueprint('professores', __name__)
+professor_bp = Blueprint("professores", __name__)
 
-professores = listar_professores()
-
-@professores_bp.route('/', methods=['GET'])
+@professor_bp.route("/", methods=["GET"])
+@swag_from({'tags': ['PROFESSORES']})
 def get_professores():
-    """
-    Lista todos os professores
-    ---
-    responses:
-      200:
-        description: Lista de professores retornada com sucesso
-        content:
-          application/json:
-            example: [{"id": 1, "nome": "Carlos"}]
-    """
-    return jsonify(listar_professores())
+    professores = listar_professores()
+    return jsonify([{"id": p.id, "nome": p.nome, "especialidade": p.especialidade} for p in professores])
 
-@professores_bp.route('/', methods=['POST'])
-def add_professor():
-    """
-    Cria um novo professor
-    ---
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - nome
-            properties:
-              nome:
-                type: string
-                example: Ana
-    responses:
-      201:
-        description: Professor criado com sucesso
-        content:
-          application/json:
-            example: {"id": 2, "nome": "Ana"}
-      400:
-        description: Dados inválidos
-    """
-    data = request.get_json()
-    if not data or 'nome' not in data:
-        return jsonify({"erro": "professor sem nome"}), 400
-    professor = criar_professor(data['nome'])
-    return jsonify(professor), 201
+@professor_bp.route("/", methods=["POST"])
+@swag_from({'tags': ['PROFESSORES']})
+def post_professor():
+    data = request.form
+    professor = criar_professor(data['nome'], data['especialidade'])
+    return jsonify({"id": professor.id, "nome": professor.nome, "especialidade": professor.especialidade}), 201
 
-@professores_bp.route('/<int:id>', methods=['GET'])
-def get_professor(id):
-    """
-    Retorna um professor pelo ID
-    ---
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: ID do professor
-        schema:
-          type: integer
-    responses:
-      200:
-        description: Professor encontrado
-        content:
-          application/json:
-            example: {"id": 1, "nome": "Carlos"}
-      404:
-        description: Professor não encontrado
-    """
-    professor = buscar_professor_por_id(id)
+@professor_bp.route("/<int:professor_id>", methods=["GET"])
+@swag_from({'tags': ['PROFESSORES']})
+def get_professor_por_id(professor_id):
+    professor = buscar_professor_por_id(professor_id)
     if professor:
-        return jsonify(professor)
+        return jsonify({"id": professor.id, "nome": professor.nome, "especialidade": professor.especialidade})
     return jsonify({"erro": "Professor não encontrado"}), 404
 
-@professores_bp.route('/<int:id>', methods=['PUT'])
-def update_professor(id):
-    """
-    Atualiza os dados de um professor
-    ---
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: ID do professor
-        schema:
-          type: integer
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              nome:
-                type: string
-                example: "Novo Nome"
-    responses:
-      200:
-        description: Professor atualizado
-      404:
-        description: Professor não encontrado
-    """
-    data = request.get_json()
-    professor = buscar_professor_por_id(id)
+@professor_bp.route("/<int:professor_id>", methods=["PUT"])
+@swag_from({'tags': ['PROFESSORES']})
+def put_professor(professor_id):
+    data = request.form
+    professor = atualizar_professor(professor_id, data['nome'], data['especialidade'])
     if professor:
-        professor.update(data)
-        return jsonify(professor)
+        return jsonify({"id": professor.id, "nome": professor.nome, "especialidade": professor.especialidade})
     return jsonify({"erro": "Professor não encontrado"}), 404
 
-@professores_bp.route('/<int:id>', methods=['DELETE'])
-def delete_professor(id):
-    """
-    Deleta um professor pelo ID
-    ---
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: ID do professor
-        schema:
-          type: integer
-    responses:
-      200:
-        description: Professor deletado com sucesso
-      404:
-        description: Professor não encontrado
-    """
-    global professores
-    professor = buscar_professor_por_id(id)
+@professor_bp.route("/<int:professor_id>", methods=["DELETE"])
+@swag_from({'tags': ['PROFESSORES']})
+def delete_professor(professor_id):
+    professor = deletar_professor(professor_id)
     if professor:
-        professores = [p for p in professores if p['id'] != id]
-        return jsonify({"message": "Professor deletado com sucesso"})
+        return jsonify({"mensagem": "Professor deletado com sucesso"})
     return jsonify({"erro": "Professor não encontrado"}), 404
