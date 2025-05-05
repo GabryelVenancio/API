@@ -105,6 +105,15 @@ E aperte a tecla `Enter`
         </sub>
       </a>
     </td>
+    <td align="center">
+      <a href="https://github.com/mauricio003" title="Github Mauricio">
+        <img src="API-Flask/Pictures/Mauricio.jpg" width="120px;" alt="Foto Mauricio Costa"/><br>
+        <sub>
+          <b>MAURICIO COSTA</b><br>
+          <b>2400487</b>
+        </sub>
+      </a>
+    </td>
   </tr>
 </table>
 
