@@ -1,77 +1,105 @@
 import requests
 
-BASE_URL = "http://127.0.0.1:8000"
+URLS_ALUNOS_GET = [
+    "http://127.0.0.1:5000/apidocs/#/ALUNOS/get_alunos__id_",
+]
 
-def testar_reset():
-    r = requests.post(f"{BASE_URL}/reseta")
-    try:
-        print("RESET:", r.status_code, r.json())
-    except requests.exceptions.JSONDecodeError:
-        print("RESET:", r.status_code, "Resposta não é JSON:", r.text)
+URL_DELETE_ALUNOS = "http://127.0.0.1:5000/alunos/{id}"
+URL_PUT_ALUNOS = "http://127.0.0.1:5000/alunos/{id}"
 
-def testar_post_professor():
-    professor = {"nome": "Maria Oliveira"}
-    r = requests.post(f"{BASE_URL}/professores", json=professor)
+def testar_get_alunos():
+    for url in URLS_ALUNOS_GET:
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                print(f"✅ {url} - OK ({response.status_code})")
+            else:
+                print(f"❌ {url} - Falhou ({response.status_code}): {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"❌ {url} - Erro: {e}")
+
+
+def verificar_aluno_existe(aluno_id):
+    url = f"http://127.0.0.1:5000/alunos/{aluno_id}"  
     try:
-        print("POST /professores:", r.status_code, r.json())
-        return r.json().get("id")
-    except requests.exceptions.JSONDecodeError:
-        print("POST /professores falhou:", r.status_code, r.text)
+        response = requests.get(url)
+        if response.status_code == 200:
+            return True  
+        else:
+            return False 
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Erro ao verificar aluno com ID {aluno_id}: {e}")
+        return False
+
+
+def criar_aluno_de_teste():
+    url = "http://127.0.0.1:5000/alunos"
+    dados_aluno = {
+        "nome": "Aluno Teste",
+        "email": "aluno@teste.com"
+    }
+    try:
+        response = requests.post(url, json=dados_aluno)
+        if response.status_code == 201:
+            aluno_id = response.json().get("id")
+            print(f"✅ Aluno de Teste Criado com ID {aluno_id}")
+            return aluno_id
+        else:
+            print(f"❌ Erro ao criar aluno de teste: {response.status_code}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Erro ao criar aluno de teste: {e}")
         return None
 
-def testar_post_turma(professor_id):
-    turma = {
-        "descricao": "Turma A",
-        "professor_id": professor_id,
-        "ativo": True
+def testar_delete_alunos(aluno_id):
+    if not verificar_aluno_existe(aluno_id): 
+        print(f"❌ Aluno com ID {aluno_id} não encontrado. Não é possível deletar.")
+        return
+    
+    url = URL_DELETE_ALUNOS.format(id=aluno_id)  #    
+    try:
+        response = requests.delete(url)
+        
+        if response.status_code == 200:
+            print(f"✅ {url} - OK ({response.status_code}) - Aluno Deletado com Sucesso!")
+        else:
+            print(f"❌ {url} - Falhou ({response.status_code}): {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"❌ {url} - Erro: {e}")
+
+
+def testar_put_alunos(aluno_id):
+    if not verificar_aluno_existe(aluno_id):  
+        print(f"❌ Aluno com ID {aluno_id} não encontrado. Não é possível atualizar.")
+        return
+
+    dados_atualizados = {
+        "nome": "João Silva Atualizado",
+        "email": "joao.novo@email.com"
     }
-    r = requests.post(f"{BASE_URL}/turmas", json=turma)
-    try:
-        print("POST /turmas:", r.status_code, r.json())
-        return r.json().get("id")
-    except requests.exceptions.JSONDecodeError:
-        print("POST /turmas falhou:", r.status_code, r.text)
-        return None
 
-def testar_post_aluno(turma_id):
-    aluno = {
-        "nome": "João da Silva",
-        "idade": 20,
-        "turma_id": turma_id,
-        "data_nascimento": "2003-05-15",
-        "nota_primeiro_semestre": 7.5,
-        "nota_segundo_semestre": 8.0
-    }
-    r = requests.post(f"{BASE_URL}/alunos", json=aluno)
+    url = URL_PUT_ALUNOS.format(id=aluno_id)  
+    
     try:
-        print("POST /alunos:", r.status_code, r.json())
-    except requests.exceptions.JSONDecodeError:
-        print("POST /alunos falhou:", r.status_code, r.text)
+ 
+        response = requests.put(url, json=dados_atualizados)
+        
+        if response.status_code == 200:
+            print(f"✅ {url} - OK ({response.status_code}) - Aluno Atualizado com Sucesso!")
+        else:
+            print(f"❌ {url} - Falhou ({response.status_code}): {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"❌ {url} - Erro: {e}")
 
-def testar_gets():
-    try:
-        print("\nGET /professores:", requests.get(f"{BASE_URL}/professores").json())
-    except:
-        print("Erro ao fazer GET /professores")
-
-    try:
-        print("GET /turmas:", requests.get(f"{BASE_URL}/turmas").json())
-    except:
-        print("Erro ao fazer GET /turmas")
-
-    try:
-        print("GET /alunos:", requests.get(f"{BASE_URL}/alunos").json())
-    except:
-        print("Erro ao fazer GET /alunos")
-
-# Execução dos testes
 if __name__ == "__main__":
-    testar_reset()
-
-    professor_id = testar_post_professor()
-    if professor_id:
-        turma_id = testar_post_turma(professor_id)
-        if turma_id:
-            testar_post_aluno(turma_id)
-
-    testar_gets()
+    print("🔍 Testando as URLs de Alunos (GET)...\n")
+    testar_get_alunos()
+    
+    aluno_id = criar_aluno_de_teste() 
+    
+    if aluno_id:
+        print(f"\n🔍 Testando a URL DELETE de Alunos para ID {aluno_id}...\n")
+        testar_delete_alunos(aluno_id) 
+        
+        print(f"\n🔍 Testando a URL PUT de Alunos para ID {aluno_id}...\n")
+        testar_put_alunos(aluno_id) 
