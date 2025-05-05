@@ -1,8 +1,8 @@
 """
-Alunos Schemas
+Turmas Schemas
 ---
 definitions:
-  Aluno:
+  Turma:
     type: object
     properties:
       id:
@@ -10,5 +10,8 @@ definitions:
         example: 1
       nome:
         type: string
-        example: "Carlos"
+        example: "Turma A"
+      professor_id:
+        type: integer
+        example: 1
 """

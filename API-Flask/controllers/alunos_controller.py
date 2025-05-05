@@ -1,138 +1,60 @@
-from flask import Blueprint, jsonify, request
-from models.alunos.alunos import criar_aluno, listar_alunos, buscar_aluno_por_id
+from flask import Blueprint, request, jsonify
+from models.alunos import (
+    criar_aluno, listar_alunos, buscar_aluno_por_id,
+    atualizar_aluno, deletar_aluno
+)
+from flasgger import swag_from
 
-alunos_bp = Blueprint('alunos', __name__)
+aluno_bp = Blueprint("alunos", __name__)
 
-alunos = listar_alunos()
-
-@alunos_bp.route('/', methods=['GET'])
+@aluno_bp.route("/", methods=["GET"])
+@swag_from({
+    'tags': ['ALUNOS'],
+    'responses': {
+        200: {
+            'description': 'Lista de alunos retornada com sucesso'
+        }
+    }
+})
 def get_alunos():
-    """
-    Lista todos os alunos
-    ---
-    responses:
-      200:
-        description: Lista de alunos retornada com sucesso
-        content:
-          application/json:
-            example: [{"id": 1, "nome": "João"}]
-    """
-    return jsonify(listar_alunos())
+    alunos = listar_alunos()
+    return jsonify([{"id": a.id, "nome": a.nome, "email": a.email} for a in alunos])
 
-@alunos_bp.route('/', methods=['POST'])
-def add_aluno():
-    """
-    Cria um novo aluno
-    ---
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - nome
-            properties:
-              nome:
-                type: string
-                example: Maria
-    responses:
-      201:
-        description: Aluno criado com sucesso
-        content:
-          application/json:
-            example: {"id": 2, "nome": "Maria"}
-      400:
-        description: Dados inválidos
-    """
-    data = request.get_json()
-    if not data or 'nome' not in data:
-        return jsonify({"erro": "aluno sem nome"}), 400
-    aluno = criar_aluno(data['nome'])
-    return jsonify(aluno), 201
+@aluno_bp.route("/", methods=["POST"])
+@swag_from({
+    'tags': ['ALUNOS'],
+    'parameters': [
+        {'name': 'nome', 'in': 'formData', 'type': 'string', 'required': True},
+        {'name': 'email', 'in': 'formData', 'type': 'string', 'required': True},
+    ],
+    'responses': {201: {'description': 'Aluno criado com sucesso'}}
+})
+def post_aluno():
+    data = request.form
+    aluno = criar_aluno(data['nome'], data['email'])
+    return jsonify({"id": aluno.id, "nome": aluno.nome, "email": aluno.email}), 201
 
-@alunos_bp.route('/<int:id>', methods=['GET'])
-def get_aluno(id):
-    """
-    Retorna um aluno pelo ID
-    ---
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: ID do aluno
-        schema:
-          type: integer
-    responses:
-      200:
-        description: Aluno encontrado
-        content:
-          application/json:
-            example: {"id": 1, "nome": "João"}
-      404:
-        description: Aluno não encontrado
-    """
-    aluno = buscar_aluno_por_id(id)
+@aluno_bp.route("/<int:aluno_id>", methods=["GET"])
+@swag_from({'tags': ['ALUNOS']})
+def get_aluno_por_id(aluno_id):
+    aluno = buscar_aluno_por_id(aluno_id)
     if aluno:
-        return jsonify(aluno)
+        return jsonify({"id": aluno.id, "nome": aluno.nome, "email": aluno.email})
     return jsonify({"erro": "Aluno não encontrado"}), 404
 
-@alunos_bp.route('/<int:id>', methods=['PUT'])
-def update_aluno(id):
-    """
-    Atualiza os dados de um aluno
-    ---
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: ID do aluno
-        schema:
-          type: integer
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              nome:
-                type: string
-                example: "Novo Nome"
-    responses:
-      200:
-        description: Aluno atualizado
-      404:
-        description: Aluno não encontrado
-    """
-    data = request.get_json()
-    aluno = buscar_aluno_por_id(id)
+@aluno_bp.route("/<int:aluno_id>", methods=["PUT"])
+@swag_from({'tags': ['ALUNOS']})
+def put_aluno(aluno_id):
+    data = request.form
+    aluno = atualizar_aluno(aluno_id, data['nome'], data['email'])
     if aluno:
-        aluno.update(data)
-        return jsonify(aluno)
+        return jsonify({"id": aluno.id, "nome": aluno.nome, "email": aluno.email})
     return jsonify({"erro": "Aluno não encontrado"}), 404
 
-@alunos_bp.route('/<int:id>', methods=['DELETE'])
-def delete_aluno(id):
-    """
-    Deleta um aluno pelo ID
-    ---
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: ID do aluno
-        schema:
-          type: integer
-    responses:
-      200:
-        description: Aluno deletado com sucesso
-      404:
-        description: Aluno não encontrado
-    """
-    global alunos
-    aluno = buscar_aluno_por_id(id)
+@aluno_bp.route("/<int:aluno_id>", methods=["DELETE"])
+@swag_from({'tags': ['ALUNOS']})
+def delete_aluno(aluno_id):
+    aluno = deletar_aluno(aluno_id)
     if aluno:
-        alunos = [a for a in alunos if a['id'] != id]
-        return jsonify({"message": "Aluno deletado com sucesso"})
+        return jsonify({"mensagem": "Aluno deletado com sucesso"})
     return jsonify({"erro": "Aluno não encontrado"}), 404
