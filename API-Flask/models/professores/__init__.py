@@ -1,4 +1,5 @@
-from models.professores.professores import (
+from .professores import (
+    Professor,
     criar_professor,
     listar_professores,
     buscar_professor_por_id,

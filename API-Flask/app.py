@@ -19,8 +19,79 @@ app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SWAGGER'] = {
-    "title": "DevAPI - Documentação com Swagger",
-    "uiversion": 3
+    'title': 'DevAPI',
+    'uiversion': 3,
+    'openapi': '3.0.0',  # Especifica que estamos usando OpenAPI 3.0
+    'specs_route': '/apidocs/',
+    'components': {
+        'schemas': {
+            'Aluno': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'integer', 'example': 1},
+                    'nome': {'type': 'string', 'example': 'Henry Modesto'},
+                    'idade': {'type': 'integer', 'example': 19},
+                    'turma_id': {'type': 'integer', 'example': 1},
+                    'data_nascimento': {'type': 'string', 'format': 'date', 'example': '2005-06-29'},
+                    'nota_primeiro_semestre': {'type': 'number', 'format': 'float', 'example': 7.5},
+                    'nota_segundo_semestre': {'type': 'number', 'format': 'float', 'example': 8.0},
+                    'media_final': {'type': 'number', 'format': 'float', 'example': 7.75}
+                }
+            },
+            'AlunoInput': {
+                'type': 'object',
+                'required': ['nome', 'idade', 'turma_id', 'data_nascimento', 
+                            'nota_primeiro_semestre', 'nota_segundo_semestre'],
+                'properties': {
+                    'nome': {'type': 'string', 'example': 'Henry Modesto'},
+                    'idade': {'type': 'integer', 'example': 19},
+                    'turma_id': {'type': 'integer', 'example': 1},
+                    'data_nascimento': {'type': 'string', 'format': 'date', 'example': '2005-06-29'},
+                    'nota_primeiro_semestre': {'type': 'number', 'format': 'float', 'example': 7.5},
+                    'nota_segundo_semestre': {'type': 'number', 'format': 'float', 'example': 8.0}
+                }
+            },
+            'Professor': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'integer', 'example': 1},
+                    'nome': {'type': 'string', 'example': 'Gabryel Cleffs'},
+                    'idade': {'type': 'integer', 'example': 20},
+                    'materia': {'type': 'string', 'example': 'Matemática'},
+                    'observacoes': {'type': 'string', 'example': 'Professor titular'}
+                }
+            },
+            'ProfessorInput': {
+                'type': 'object',
+                'required': ['nome', 'idade', 'materia'],
+                'properties': {
+                    'nome': {'type': 'string', 'example': 'Gabryel Cleffs'},
+                    'idade': {'type': 'integer', 'example': 20},
+                    'materia': {'type': 'string', 'example': 'Matemática'},
+                    'observacoes': {'type': 'string', 'example': 'Professor titular'}
+                }
+            },
+            
+            'Turma': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'integer', 'example': 1},
+                    'descricao': {'type': 'string', 'example': '3º Ano C'},
+                    'professor_id': {'type': 'integer', 'example': 1},
+                    'ativo': {'type': 'boolean', 'example': True}
+                }
+            },
+            'TurmaInput': {
+                'type': 'object',
+                'required': ['descricao', 'professor_id'],
+                'properties': {
+                    'descricao': {'type': 'string', 'example': '3º Ano C'},
+                    'professor_id': {'type': 'integer', 'example': 1},
+                    'ativo': {'type': 'boolean', 'example': True}
+                }
+            }
+        }
+    }
 }
 
 # Inicializações
@@ -103,12 +174,17 @@ def teste():
     return {"message": "Tudo está funcionando corretamente!"}
 
 with app.app_context():
-    # Importe os modelos AQUI dentro do contexto
-    from models.alunos.alunos import Aluno
+    # Importar todos os modelos
     from models.professores.professores import Professor
     from models.turmas.turmas import Turma
+    from models.alunos.alunos import Aluno
     
     db.create_all()
+    
+    @db.event.listens_for(Aluno.nota_primeiro_semestre, 'set')
+    @db.event.listens_for(Aluno.nota_segundo_semestre, 'set')
+    def calcular_media(aluno, value, oldvalue, initiator):
+        aluno.calcular_media()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

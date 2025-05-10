@@ -1,63 +1,72 @@
 from config import db
-from typing import Dict, Union, List, Optional
+from typing import Optional, Tuple, Dict, List
 
 class Turma(db.Model):
-    __tablename__ = 'turmas'  # Nome explícito da tabela
+    __tablename__ = 'turmas'
     
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False)
-    periodo = db.Column(db.String(50), nullable=False)
+    descricao = db.Column(db.String(100), nullable=False)
+    professor_id = db.Column(db.Integer, db.ForeignKey('professores.id'), nullable=False)
+    ativo = db.Column(db.Boolean, default=True)
     
-    alunos = db.relationship('Aluno', backref='turma_rel', lazy=True)
-    
-    def to_dict(self) -> Dict[str, Union[int, str]]:
-        """Converte o objeto Turma para dicionário."""
+    alunos = db.relationship('Aluno', backref='turma', lazy=True)
+
+    def to_dict(self) -> Dict:
         return {
             'id': self.id,
-            'nome': self.nome,
-            'periodo': self.periodo
+            'descricao': self.descricao,
+            'professor_id': self.professor_id,
+            'ativo': self.ativo
         }
 
-def criar_turma(nome: str, periodo: str) -> Turma:
-    """Cria e persiste uma nova turma no banco de dados."""
-    nova_turma = Turma(nome=nome, periodo=periodo)
-    db.session.add(nova_turma)
+# Funções CRUD
+def criar_turma(data: Dict) -> Tuple[Dict, int]:
     try:
+        turma = Turma(
+            descricao=data['descricao'],
+            professor_id=data['professor_id'],
+            ativo=data.get('ativo', True)
+        )
+        db.session.add(turma)
         db.session.commit()
+        return turma.to_dict(), 201
     except Exception as e:
         db.session.rollback()
-        raise e
-    return nova_turma
+        return {'error': str(e)}, 400
 
-def listar_turmas() -> List[Turma]:
-    """Retorna todas as turmas cadastradas."""
-    return Turma.query.order_by(Turma.nome).all()
+def listar_turmas() -> List[Dict]:
+    turmas = Turma.query.all()
+    return [turma.to_dict() for turma in turmas]
 
-def buscar_turma_por_id(turma_id: int) -> Optional[Turma]:
-    """Busca uma turma pelo ID."""
-    return Turma.query.get(turma_id)
+def buscar_turma_por_id(turma_id: int) -> Optional[Dict]:
+    turma = Turma.query.get(turma_id)
+    return turma.to_dict() if turma else None
 
-def atualizar_turma(turma_id: int, nome: str, periodo: str) -> Optional[Turma]:
-    """Atualiza os dados de uma turma existente."""
-    turma = buscar_turma_por_id(turma_id)
-    if turma:
-        turma.nome = nome
-        turma.periodo = periodo
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise e
-    return turma
+def atualizar_turma(turma_id: int, data: Dict) -> Tuple[Dict, int]:
+    turma = Turma.query.get(turma_id)
+    if not turma:
+        return {'error': 'Turma não encontrada'}, 404
+    
+    try:
+        turma.descricao = data.get('descricao', turma.descricao)
+        turma.professor_id = data.get('professor_id', turma.professor_id)
+        turma.ativo = data.get('ativo', turma.ativo)
+        
+        db.session.commit()
+        return turma.to_dict(), 200
+    except Exception as e:
+        db.session.rollback()
+        return {'error': str(e)}, 400
 
-def deletar_turma(turma_id: int) -> Optional[Turma]:
-    """Remove uma turma do banco de dados."""
-    turma = buscar_turma_por_id(turma_id)
-    if turma:
-        try:
-            db.session.delete(turma)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise e
-    return turma
+def deletar_turma(turma_id: int) -> Tuple[Dict, int]:
+    turma = Turma.query.get(turma_id)
+    if not turma:
+        return {'error': 'Turma não encontrada'}, 404
+    
+    try:
+        db.session.delete(turma)
+        db.session.commit()
+        return {'message': 'Turma deletada com sucesso'}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {'error': str(e)}, 400

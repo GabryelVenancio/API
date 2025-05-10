@@ -1,97 +1,98 @@
-from typing import Optional, List
 from config import db
+from datetime import datetime
+from typing import Optional
 
 class Aluno(db.Model):
-    __tablename__ = 'alunos'  # Nome explícito da tabela
+    __tablename__ = 'alunos'
     
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
+    idade = db.Column(db.Integer, nullable=False)
     turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'), nullable=False)
+    data_nascimento = db.Column(db.Date, nullable=False)
+    nota_primeiro_semestre = db.Column(db.Float, nullable=False)
+    nota_segundo_semestre = db.Column(db.Float, nullable=False)
+    media_final = db.Column(db.Float, nullable=False)
+
+    def calcular_media(self):
+        self.media_final = (self.nota_primeiro_semestre + self.nota_segundo_semestre) / 2
+        return self.media_final
 
     def to_dict(self):
         return {
             'id': self.id,
             'nome': self.nome,
-            'email': self.email,
-            'turma_id': self.turma_id
+            'idade': self.idade,
+            'turma_id': self.turma_id,
+            'data_nascimento': str(self.data_nascimento),
+            'nota_primeiro_semestre': self.nota_primeiro_semestre,
+            'nota_segundo_semestre': self.nota_segundo_semestre,
+            'media_final': self.media_final
         }
 
-def criar_aluno(nome: str, email: str) -> Aluno:
-    """Cria e persiste um novo aluno no banco de dados.
-    
-    Args:
-        nome: Nome completo do aluno
-        email: Email único do aluno
-        
-    Returns:
-        Objeto Aluno criado
-    """
-    novo_aluno = Aluno(nome=nome, email=email)
-    db.session.add(novo_aluno)
+# Funções CRUD
+def criar_aluno(data: dict) -> tuple:
     try:
+        data_nascimento = datetime.strptime(data['data_nascimento'], '%Y-%m-%d').date()
+        aluno = Aluno(
+            nome=data['nome'],
+            idade=data['idade'],
+            turma_id=data['turma_id'],
+            data_nascimento=data_nascimento,
+            nota_primeiro_semestre=data['nota_primeiro_semestre'],
+            nota_segundo_semestre=data['nota_segundo_semestre']
+        )
+        aluno.calcular_media()
+        db.session.add(aluno)
         db.session.commit()
+        return aluno.to_dict(), 201
     except Exception as e:
         db.session.rollback()
-        raise e
-    return novo_aluno
+        return {'error': str(e)}, 400
 
-def listar_alunos() -> List[Aluno]:
-    """Retorna todos os alunos cadastrados.
-    
-    Returns:
-        Lista de objetos Aluno
-    """
-    return Aluno.query.order_by(Aluno.nome).all()
+def listar_alunos() -> list:
+    alunos = Aluno.query.all()
+    return [aluno.to_dict() for aluno in alunos]
 
-def buscar_aluno_por_id(aluno_id: int) -> Optional[Aluno]:
-    """Busca um aluno pelo ID.
+def buscar_aluno_por_id(aluno_id: int) -> Optional[dict]:
+    aluno = Aluno.query.get(aluno_id)
+    return aluno.to_dict() if aluno else None
+
+def atualizar_aluno(aluno_id: int, data: dict) -> tuple:
+    aluno = Aluno.query.get(aluno_id)
+    if not aluno:
+        return {'error': 'Aluno não encontrado'}, 404
     
-    Args:
-        aluno_id: ID do aluno
+    try:
+        aluno.nome = data.get('nome', aluno.nome)
+        aluno.idade = data.get('idade', aluno.idade)
+        aluno.turma_id = data.get('turma_id', aluno.turma_id)
         
-    Returns:
-        Objeto Aluno ou None se não encontrado
-    """
-    return Aluno.query.get(aluno_id)
-
-def atualizar_aluno(aluno_id: int, nome: str, email: str) -> Optional[Aluno]:
-    """Atualiza os dados de um aluno existente.
-    
-    Args:
-        aluno_id: ID do aluno a ser atualizado
-        nome: Novo nome
-        email: Novo email
+        if 'data_nascimento' in data:
+            aluno.data_nascimento = datetime.strptime(data['data_nascimento'], '%Y-%m-%d').date()
         
-    Returns:
-        Objeto Aluno atualizado ou None se não encontrado
-    """
-    aluno = buscar_aluno_por_id(aluno_id)
-    if aluno:
-        aluno.nome = nome
-        aluno.email = email
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise e
-    return aluno
-
-def deletar_aluno(aluno_id: int) -> Optional[Aluno]:
-    """Remove um aluno do banco de dados.
-    
-    Args:
-        aluno_id: ID do aluno a ser removido
+        if 'nota_primeiro_semestre' in data:
+            aluno.nota_primeiro_semestre = data['nota_primeiro_semestre']
         
-    Returns:
-        Objeto Aluno removido ou None se não encontrado
-    """
-    aluno = buscar_aluno_por_id(aluno_id)
-    if aluno:
-        try:
-            db.session.delete(aluno)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise e
-    return aluno
+        if 'nota_segundo_semestre' in data:
+            aluno.nota_segundo_semestre = data['nota_segundo_semestre']
+        
+        aluno.calcular_media()
+        db.session.commit()
+        return aluno.to_dict(), 200
+    except Exception as e:
+        db.session.rollback()
+        return {'error': str(e)}, 400
+
+def deletar_aluno(aluno_id: int) -> tuple:
+    aluno = Aluno.query.get(aluno_id)
+    if not aluno:
+        return {'error': 'Aluno não encontrado'}, 404
+    
+    try:
+        db.session.delete(aluno)
+        db.session.commit()
+        return {'message': 'Aluno deletado com sucesso'}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {'error': str(e)}, 400
