@@ -1,80 +1,107 @@
-<h1 align=center> API FLASK </h1>
+<h1 align="center">📚 API RESTful com Flask - Gestão Escolar</h1>
 
-### OBJETIVO
+<p align="center">
+  Projeto acadêmico desenvolvido para simular a gestão de uma instituição de ensino, com funcionalidades CRUD para professores, turmas e alunos.
+</p>
 
-Implementar uma API RESTful utilizando Flask para gerenciar professores, turmas e alunos, permitindo operações CRUD e integração com Postman para testes.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python" />
+  <img src="https://img.shields.io/badge/Flask-2.x-green?logo=flask" />
+  <img src="https://img.shields.io/badge/Docker-ready-blue?logo=docker" />
+  <img src="https://img.shields.io/badge/Postman-tested-orange?logo=postman" />
+</p>
 
+---
 
-### TEMA
+## 🎯 Objetivo
 
-Gestão de uma Instituição de Ensino
+Desenvolver uma API RESTful com **Flask** para gerenciamento de entidades escolares, como:
+- Professores
+- Turmas
+- Alunos
 
+Com suporte a operações **CRUD**, integração com **Postman** e conteinerização com **Docker**.
 
-### DOWNLOAD DO PROJETO
+---
 
-Baixe o projeto em seu computador através do comando:
+## 📦 Clone ou Download
 
+### 🔁 Clonar via Git
 ```bash
-git clone https://github.com/GabryelVenancio/API/
+git clone https://github.com/GabryelVenancio/API.git
 ```
 
-**ou**
+### 📥 Download ZIP
+1. Clique em `<> Code` > `Download ZIP`
+2. Extraia o arquivo em seu computador
 
-1. Clique em `<> Code`.
-2. Faça o download do arquivo ZIP.
-3. Abra o seu explorador de arquivos na localização da instalação.
-4. Extraia o arquivo ZIP.
+---
 
-#
-### ACESSO PELO TERMINAL 
+## 💻 Execução do Projeto
 
-Após a instalação:
-
-1. Clique com o botão direito do mouse na pasta `GabryelVenancio/API`.
-2. Selecione "Abrir no Terminal".
-
-#
-### COMANDOS DE COMMITE
-
-1. Adicione suas mudanças ao controle de versão:
+<details>
+<summary><strong>📂 Acesse a pasta do projeto via terminal</strong></summary>
 
 ```bash
+cd API
+```
+
+Ou clique com o botão direito na pasta do projeto e selecione **"Abrir no Terminal"**
+</details>
+
+<details>
+<summary><strong>🔧 Instalar as dependências</strong></summary>
+
+```bash
+pip install -r requirements.txt
+```
+</details>
+
+<details>
+<summary><strong>🐳 Executar com Docker (recomendado)</strong></summary>
+
+1. Criar a imagem Docker:
+   ```bash
+   docker build -t api-flask .
+   ```
+
+2. Rodar o container:
+   ```bash
+   docker run -p 5000:5000 api-flask
+   ```
+
+3. Acesse: [http://localhost:5000](http://localhost:5000)
+</details>
+
+---
+
+## 🔄 Git Workflow
+
+<details>
+<summary><strong>🔃 Comandos de versionamento</strong></summary>
+
+```bash
+# Adicionar mudanças
 git add .
+
+# Comitar alterações
+git commit -m "Descrição clara das mudanças"
+
+# Atualizar repositório local
+git pull
+
+# Enviar alterações
+git push origin main
 ```
 
-E aperte a tecla `Enter`
+> 📝 Substitua `main` pela sua branch se estiver em desenvolvimento.
+</details>
 
-2. Comite as alterações com uma mensagem descritiva:
 
-```bash
-git commit -m "Descrição das mudanças que realizou"
-```
-
-E aperte a tecla `Enter`
-
-3. Atualize seu repositório local com a versão mais recente do projeto:
-
-```bash
-git pull 
-```
-
-E aperte a tecla `Enter`
-
-4. Envie suas alterações locais para o repositório remoto:
-
-```bash
-Develop
-git push <remote_url> <branch_Develop>
-
-git push <remote_url> <branch_principal>
-main
-```
-
-E aperte a tecla `Enter`
 
 #
 
-### EQUIPE
+### 👨‍💻 EQUIPE DE DESENVOLVIMENTO
 
 <table align="center">
   <tr>
@@ -129,4 +156,5 @@ E aperte a tecla `Enter`
 ![Git](https://img.shields.io/badge/Git-0D1117?style=for-the-badge&logo=Git&logoColor=white&labelColor=0D1117)&nbsp;
 ![GitHub](https://img.shields.io/badge/-GitHub-0D1117?style=for-the-badge&logo=github&labelColor=0D1117)&nbsp;
 ![Postman](https://img.shields.io/badge/Postman-0D1117?style=for-the-badge&logo=Postman&logoColor=white&labelColor=0D1117)&nbsp;
+![Docker](https://img.shields.io/badge/-Docker-0D1117?style=for-the-badge&logo=docker&logoColor=white)&nbsp;
 ![Visual Studio Code](https://img.shields.io/badge/-Visual%20Studio%20Code-0D1117?style=for-the-badge&logo=visual%20studio%20code&logoColor=white&labelColor=0D1117)&nbsp;
