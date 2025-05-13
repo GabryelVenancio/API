@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from models.alunos import (
-    criar_aluno,
-    listar_alunos_id,
-    atualizar_aluno,
-    deletar_aluno
+    criar_aluno as model_criar_alunos,
+    listar_alunos as model_listar_alunos,
+    atualizar_aluno as model_atualizar_alunos,
+    deletar_aluno as model_deletar_alunos
 )
 
 aluno_bp = Blueprint('aluno', __name__)
@@ -12,7 +12,7 @@ aluno_bp = Blueprint('aluno', __name__)
 def listar_alunos_route():
     """
     Lista todos os alunos
-    ---
+    ---  
     tags:
       - Alunos
     responses:
@@ -30,14 +30,14 @@ def listar_alunos_route():
                 total_alunos:
                   type: integer
     """
-    response = listar_alunos_id()
+    response = model_listar_alunos()
     return jsonify(response), 200
 
 @aluno_bp.route('', methods=['POST'])
 def criar_aluno_route():
     """
     Cria um novo aluno
-    ---
+    ---  
     tags:
       - Alunos
     requestBody:
@@ -60,19 +60,29 @@ def criar_aluno_route():
     if not data:
         return jsonify({'error': 'JSON inválido ou ausente'}), 400
 
+    # Campos obrigatórios
     required_fields = ['nome', 'idade', 'turma_id', 'data_nascimento', 'nota_primeiro_semestre', 'nota_segundo_semestre']
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'Campo {field} é obrigatório'}), 400
 
-    resposta, status = criar_aluno(data)
+    # Verificar se as notas não são None
+    if data.get('nota_primeiro_semestre') is None or data.get('nota_segundo_semestre') is None:
+        return jsonify({'error': 'As notas não podem ser None'}), 400
+
+    # Chamada para o modelo de criação de aluno
+    resposta, status = model_criar_alunos(data)
+    
+    if status != 201:
+        return jsonify({'error': 'Erro ao criar aluno'}), status
+    
     return jsonify(resposta), status
 
 @aluno_bp.route('/<int:id>', methods=['PUT'])
 def atualizar_aluno_route(id):
     """
     Atualiza um aluno existente
-    ---
+    ---  
     tags:
       - Alunos
     parameters:
@@ -104,14 +114,15 @@ def atualizar_aluno_route(id):
     if not data:
         return jsonify({'error': 'JSON inválido ou ausente'}), 400
 
-    resposta, status = atualizar_aluno(id, data)
+    # Atualiza aluno
+    resposta, status = model_atualizar_alunos(id, data)
     return jsonify(resposta), status
 
 @aluno_bp.route('/<int:id>', methods=['DELETE'])
 def deletar_aluno_route(id):
     """
     Remove um aluno pelo ID
-    ---
+    ---  
     tags:
       - Alunos
     parameters:
@@ -135,5 +146,5 @@ def deletar_aluno_route(id):
       404:
         description: Aluno não encontrado
     """
-    resposta, status = deletar_aluno(id)
+    resposta, status = model_deletar_alunos(id)
     return jsonify(resposta), status

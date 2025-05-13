@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
 from models.professores import (
-    criar_professor,
-    listar_professores_id,
-    atualizar_professor,
-    deletar_professor
+    criar_professor as model_criar_professor,
+    listar_professores as model_listar_professores,
+    buscar_professor_por_id,
+    atualizar_professor as model_atualizar_professor,
+    deletar_professor as model_deletar_professor
 )
 
 professor_bp = Blueprint('professor', __name__)
@@ -25,11 +26,11 @@ def listar_professores():
               items:
                 $ref: '#/components/schemas/Professor'
     """
-    professores = listar_professores_id()
+    professores = model_listar_professores()
     return jsonify(professores)
 
 @professor_bp.route('', methods=['POST'])
-def criar_professor():
+def criar_professor_route():
     """
     Cria um novo professor
     ---
@@ -49,14 +50,47 @@ def criar_professor():
             schema:
               $ref: '#/components/schemas/Professor'
       400:
-        description: Erro na requisição
+        description: Dados inválidos
+      409:
+        description: Professor já existe
     """
     data = request.get_json()
-    resposta, status = criar_professor(data)
+    if not data or not all(key in data for key in ['nome', 'idade', 'materia']):
+        return jsonify({'error': 'Dados incompletos'}), 400
+    
+    resposta, status = model_criar_professor(data)
     return jsonify(resposta), status
 
+@professor_bp.route('/<int:id>', methods=['GET'])
+def obter_professor(id):
+    """
+    Obtém um professor pelo ID
+    ---
+    tags:
+      - Professores
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      200:
+        description: Professor encontrado
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Professor'
+      404:
+        description: Professor não encontrado
+    """
+    professor = buscar_professor_por_id(id)
+    if not professor:
+        return jsonify({'error': 'Professor não encontrado'}), 404
+    return jsonify(professor)
+
 @professor_bp.route('/<int:id>', methods=['PUT'])
-def atualizar_professor(id):
+def atualizar_professor_route(id):
     """
     Atualiza um professor existente
     ---
@@ -68,7 +102,6 @@ def atualizar_professor(id):
         required: true
         schema:
           type: integer
-        description: ID do professor a ser atualizado
     requestBody:
       required: true
       content:
@@ -83,18 +116,21 @@ def atualizar_professor(id):
             schema:
               $ref: '#/components/schemas/Professor'
       400:
-        description: Erro na validação dos dados
+        description: Dados inválidos
       404:
         description: Professor não encontrado
     """
     data = request.get_json()
-    resposta, status = atualizar_professor(id, data)
+    if not data:
+        return jsonify({'error': 'Nenhum dado fornecido'}), 400
+    
+    resposta, status = model_atualizar_professor(id, data)
     return jsonify(resposta), status
 
 @professor_bp.route('/<int:id>', methods=['DELETE'])
-def deletar_professor(id):
+def deletar_professor_route(id):
     """
-    Remove um professor pelo ID
+    Remove um professor
     ---
     tags:
       - Professores
@@ -104,7 +140,6 @@ def deletar_professor(id):
         required: true
         schema:
           type: integer
-        description: ID do professor a ser removido
     responses:
       200:
         description: Professor removido com sucesso
@@ -118,6 +153,8 @@ def deletar_professor(id):
                   example: "Professor removido com sucesso"
       404:
         description: Professor não encontrado
+      500:
+        description: Erro interno ao remover professor
     """
-    resposta, status = deletar_professor(id)
+    resposta, status = model_deletar_professor(id)
     return jsonify(resposta), status

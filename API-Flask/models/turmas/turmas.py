@@ -20,8 +20,15 @@ class Turma(db.Model):
         }
 
 # Funções CRUD
+
 def criar_turma(data: Dict) -> Tuple[Dict, int]:
     try:
+        # Verificação de campos obrigatórios
+        required_fields = ['descricao', 'professor_id']
+        for field in required_fields:
+            if field not in data:
+                return {'error': f'Campo {field} é obrigatório'}, 400
+
         turma = Turma(
             descricao=data['descricao'],
             professor_id=data['professor_id'],
@@ -34,7 +41,7 @@ def criar_turma(data: Dict) -> Tuple[Dict, int]:
         db.session.rollback()
         return {'error': str(e)}, 400
 
-def listar_turmas_id() -> List[Dict]:
+def listar_turmas() -> List[Dict]:
     turmas = Turma.query.all()
     return [turma.to_dict() for turma in turmas]
 
@@ -47,6 +54,10 @@ def atualizar_turma(turma_id: int, data: Dict) -> Tuple[Dict, int]:
     if not turma:
         return {'error': 'Turma não encontrada'}, 404
     
+    # Verificar se o campo professor_id foi informado
+    if 'professor_id' in data and not data['professor_id']:
+        return {'error': 'Campo professor_id não pode ser vazio'}, 400
+
     try:
         turma.descricao = data.get('descricao', turma.descricao)
         turma.professor_id = data.get('professor_id', turma.professor_id)
@@ -62,6 +73,10 @@ def deletar_turma(turma_id: int) -> Tuple[Dict, int]:
     turma = Turma.query.get(turma_id)
     if not turma:
         return {'error': 'Turma não encontrada'}, 404
+
+    # Verificar se a turma tem alunos associados antes de deletar
+    if turma.alunos:
+        return {'error': 'Não é possível excluir a turma. Existem alunos associados a ela.'}, 400
     
     try:
         db.session.delete(turma)

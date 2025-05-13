@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from models.turmas import (
-    criar_turma,
-    listar_turmas_id,
-    atualizar_turma,
-    deletar_turma
+    criar_turma as model_criar_turmas,
+    listar_turmas as model_listar_turmas,
+    atualizar_turma as model_atualizar_turmas,
+    deletar_turma as model_deletar_turmas
 )
 
 turma_bp = Blueprint('turma', __name__)
@@ -25,7 +25,7 @@ def listar_turmas():
               items:
                 $ref: '#/components/schemas/Turma'
     """
-    turmas = listar_turmas_id()
+    turmas = model_listar_turmas()
     return jsonify(turmas)
 
 @turma_bp.route('', methods=['POST'])
@@ -52,7 +52,14 @@ def criar_turma():
         description: Erro na requisição
     """
     data = request.get_json()
-    resposta, status = criar_turma(data)
+    
+    # Verificação de campos obrigatórios
+    required_fields = ['descricao', 'professor_id']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Campo {field} é obrigatório'}), 400
+
+    resposta, status = model_criar_turmas(data)
     return jsonify(resposta), status
 
 @turma_bp.route('/<int:id>', methods=['PUT'])
@@ -88,7 +95,7 @@ def atualizar_turma(id):
         description: Turma não encontrada
     """
     data = request.get_json()
-    resposta, status = atualizar_turma(id, data)
+    resposta, status = model_atualizar_turmas(id, data)
     return jsonify(resposta), status
 
 @turma_bp.route('/<int:id>', methods=['DELETE'])
@@ -119,5 +126,5 @@ def deletar_turma(id):
       404:
         description: Turma não encontrada
     """
-    resposta, status = deletar_turma(id)
+    resposta, status = model_deletar_turmas(id)
     return jsonify(resposta), status

@@ -37,7 +37,7 @@ def criar_professor(data: Dict) -> Tuple[Dict, int]:
         db.session.rollback()
         return {'error': str(e)}, 400
 
-def listar_professores_id() -> List[Dict]:
+def listar_professores() -> List[Dict]:
     professores = Professor.query.all()
     return [professor.to_dict() for professor in professores]
 

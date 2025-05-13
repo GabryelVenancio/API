@@ -62,9 +62,9 @@ app.config['SWAGGER'] = {
                 'type': 'object',
                 'properties': {
                     'id': {'type': 'integer', 'example': 1},
-                    'nome': {'type': 'string', 'example': 'Gabryel Cleffs'},
-                    'idade': {'type': 'integer', 'example': 20},
-                    'materia': {'type': 'string', 'example': 'Matemática'},
+                    'nome': {'type': 'string', 'example': 'Caio Ireno'},
+                    'idade': {'type': 'integer', 'example': 25},
+                    'materia': {'type': 'string', 'example': 'Desenvolvimento de APIs e Microsserviços'},
                     'observacoes': {'type': 'string', 'example': 'Professor titular'}
                 }
             },
@@ -72,9 +72,9 @@ app.config['SWAGGER'] = {
                 'type': 'object',
                 'required': ['nome', 'idade', 'materia'],
                 'properties': {
-                    'nome': {'type': 'string', 'example': 'Gabryel Cleffs'},
-                    'idade': {'type': 'integer', 'example': 20},
-                    'materia': {'type': 'string', 'example': 'Matemática'},
+                    'nome': {'type': 'string', 'example': 'Caio Ireno'},
+                    'idade': {'type': 'integer', 'example': 25},
+                    'materia': {'type': 'string', 'example': 'Desenvolvimento de APIs e Microsserviços'},
                     'observacoes': {'type': 'string', 'example': 'Professor titular'}
                 }
             },

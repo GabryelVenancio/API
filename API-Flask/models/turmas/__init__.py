@@ -1,8 +1,7 @@
 from .turmas import (
     Turma,
     criar_turma,
-    listar_turmas_id,
-    buscar_turma_por_id,
+    listar_turmas,
     atualizar_turma,
     deletar_turma
 )

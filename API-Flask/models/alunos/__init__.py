@@ -1,1 +1,1 @@
-from .alunos import Aluno, criar_aluno, listar_alunos_id, buscar_aluno_por_id, atualizar_aluno, deletar_aluno
+from .alunos import Aluno, criar_aluno, listar_alunos, buscar_aluno_por_id, atualizar_aluno, deletar_aluno
