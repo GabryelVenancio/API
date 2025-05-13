@@ -8,7 +8,6 @@ from controllers.turmas_controller import turma_bp
 from config import db
 from flasgger import Swagger
 
-# Configuração do path
 sys.path.append(dirname(abspath(__file__)))
 
 app = Flask(__name__)
@@ -20,7 +19,6 @@ def add_cache_control(response):
     response.headers['Expires'] = '0'
     return response
 
-# Configurações
 app.config['PORT'] = 5000
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -28,7 +26,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SWAGGER'] = {
     'title': 'DevAPI',
     'uiversion': 3,
-    'openapi': '3.0.0',  # Especifica que estamos usando OpenAPI 3.0
+    'openapi': '3.0.0',
     'specs_route': '/apidocs/',
     'components': {
         'schemas': {
@@ -101,11 +99,9 @@ app.config['SWAGGER'] = {
     }
 }
 
-# Inicializações
 db.init_app(app)
 swagger = Swagger(app)
 
-# Registro de Blueprints (sem duplicações)
 app.register_blueprint(aluno_bp, url_prefix="/alunos")
 app.register_blueprint(professor_bp, url_prefix="/professores")
 app.register_blueprint(turma_bp, url_prefix="/turmas")
@@ -181,7 +177,6 @@ def teste():
     return {"message": "Tudo está funcionando corretamente!"}
 
 with app.app_context():
-    # Importar todos os modelos
     from models.professores.professores import Professor
     from models.turmas.turmas import Turma
     from models.alunos.alunos import Aluno

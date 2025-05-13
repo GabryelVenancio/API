@@ -21,7 +21,6 @@ class Professor(db.Model):
             'observacoes': self.observacoes
         }
 
-# Funções CRUD
 def criar_professor(data: Dict) -> Tuple[Dict, int]:
     try:
         professor = Professor(

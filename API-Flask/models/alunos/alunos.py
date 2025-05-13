@@ -15,10 +15,10 @@ class Aluno(db.Model):
     media_final = db.Column(db.Float, nullable=True)
 
     def calcular_media(self):
-        if self.nota_primeiro_semestre is None or self.nota_segundo_semestre is None:
-            raise ValueError("As notas não podem ser None")
-        
-        self.media_final = (self.nota_primeiro_semestre + self.nota_segundo_semestre) / 2
+        if self.nota_primeiro_semestre is not None and self.nota_segundo_semestre is not None:
+            self.media_final = (self.nota_primeiro_semestre + self.nota_segundo_semestre) / 2
+        else:
+            self.media_final = 0.0
         return self.media_final
 
     def to_dict(self):
@@ -34,19 +34,15 @@ class Aluno(db.Model):
         }
 
 def criar_aluno(data: dict) -> Tuple[Dict, int]:
-    """Cria um novo aluno no banco de dados."""
     try:
-        # Verificar se as notas estão presentes
-        if 'nota_primeiro_semestre' not in data or 'nota_segundo_semestre' not in data:
-            return {'error': 'Notas do primeiro ou segundo semestre não fornecidas'}, 400
-
+        print("Dados recebidos para criar o aluno:", data)
+        
         try:
-            nota_primeiro_semestre = float(data['nota_primeiro_semestre'])
-            nota_segundo_semestre = float(data['nota_segundo_semestre'])
+            nota_primeiro_semestre = float(data['nota_primeiro_semestre']) if data.get('nota_primeiro_semestre') is not None else 0.0
+            nota_segundo_semestre = float(data['nota_segundo_semestre']) if data.get('nota_segundo_semestre') is not None else 0.0
         except (TypeError, ValueError):
             return {'error': 'Notas devem ser números válidos'}, 400
 
-        # Verificar se a data de nascimento é válida
         try:
             data_nascimento = datetime.strptime(data['data_nascimento'], '%Y-%m-%d').date()
         except (KeyError, ValueError):
@@ -61,6 +57,8 @@ def criar_aluno(data: dict) -> Tuple[Dict, int]:
             nota_segundo_semestre=nota_segundo_semestre
         )
 
+        print(f"Notas antes de calcular a média: {nota_primeiro_semestre}, {nota_segundo_semestre}")
+
         aluno.calcular_media()
         db.session.add(aluno)
         db.session.commit()
@@ -71,6 +69,7 @@ def criar_aluno(data: dict) -> Tuple[Dict, int]:
         db.session.rollback()
         return {'error': f'Erro ao criar aluno: {str(e)}'}, 400
 
+    
 def listar_alunos() -> dict:
     alunos = Aluno.query.all()
     alunos_dict = [aluno.to_dict() for aluno in alunos]

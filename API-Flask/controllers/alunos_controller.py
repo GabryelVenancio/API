@@ -27,11 +27,9 @@ def listar_alunos_route():
                   type: array
                   items:
                     $ref: '#/components/schemas/Aluno'
-                total_alunos:
-                  type: integer
     """
     response = model_listar_alunos()
-    return jsonify(response), 200
+    return jsonify({"data": response["data"]}), 200
 
 @aluno_bp.route('', methods=['POST'])
 def criar_aluno_route():
@@ -60,21 +58,15 @@ def criar_aluno_route():
     if not data:
         return jsonify({'error': 'JSON inválido ou ausente'}), 400
 
-    # Campos obrigatórios
     required_fields = ['nome', 'idade', 'turma_id', 'data_nascimento', 'nota_primeiro_semestre', 'nota_segundo_semestre']
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'Campo {field} é obrigatório'}), 400
 
-    # Verificar se as notas não são None
-    if data.get('nota_primeiro_semestre') is None or data.get('nota_segundo_semestre') is None:
-        return jsonify({'error': 'As notas não podem ser None'}), 400
-
-    # Chamada para o modelo de criação de aluno
     resposta, status = model_criar_alunos(data)
     
     if status != 201:
-        return jsonify({'error': 'Erro ao criar aluno'}), status
+        return jsonify({'error': resposta.get("error", "Erro ao criar aluno")}), status
     
     return jsonify(resposta), status
 
@@ -114,7 +106,6 @@ def atualizar_aluno_route(id):
     if not data:
         return jsonify({'error': 'JSON inválido ou ausente'}), 400
 
-    # Atualiza aluno
     resposta, status = model_atualizar_alunos(id, data)
     return jsonify(resposta), status
 

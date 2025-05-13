@@ -52,8 +52,7 @@ def criar_turma():
         description: Erro na requisição
     """
     data = request.get_json()
-    
-    # Verificação de campos obrigatórios
+
     required_fields = ['descricao', 'professor_id']
     for field in required_fields:
         if field not in data:
