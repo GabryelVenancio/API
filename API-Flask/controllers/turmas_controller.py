@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.turmas import (
     criar_turma,
-    listar_turmas,
-    buscar_turma_por_id,
+    listar_turmas_id,
     atualizar_turma,
     deletar_turma
 )
@@ -26,7 +25,7 @@ def listar_turmas():
               items:
                 $ref: '#/components/schemas/Turma'
     """
-    turmas = listar_turmas()
+    turmas = listar_turmas_id()
     return jsonify(turmas)
 
 @turma_bp.route('', methods=['POST'])

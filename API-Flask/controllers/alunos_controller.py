@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.alunos import (
     criar_aluno,
-    listar_alunos,
-    buscar_aluno_por_id,
+    listar_alunos_id,
     atualizar_aluno,
     deletar_aluno
 )
@@ -10,7 +9,7 @@ from models.alunos import (
 aluno_bp = Blueprint('aluno', __name__)
 
 @aluno_bp.route('', methods=['GET'])
-def listar_alunos():
+def listar_alunos_route():
     """
     Lista todos os alunos
     ---
@@ -22,15 +21,20 @@ def listar_alunos():
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/Aluno'
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Aluno'
+                total_alunos:
+                  type: integer
     """
-    alunos = listar_alunos()
-    return jsonify(alunos)
+    response = listar_alunos_id()
+    return jsonify(response), 200
 
 @aluno_bp.route('', methods=['POST'])
-def criar_aluno():
+def criar_aluno_route():
     """
     Cria um novo aluno
     ---
@@ -53,11 +57,19 @@ def criar_aluno():
         description: Erro na requisição
     """
     data = request.get_json()
+    if not data:
+        return jsonify({'error': 'JSON inválido ou ausente'}), 400
+
+    required_fields = ['nome', 'idade', 'turma_id', 'data_nascimento', 'nota_primeiro_semestre', 'nota_segundo_semestre']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Campo {field} é obrigatório'}), 400
+
     resposta, status = criar_aluno(data)
     return jsonify(resposta), status
 
 @aluno_bp.route('/<int:id>', methods=['PUT'])
-def atualizar_aluno(id):
+def atualizar_aluno_route(id):
     """
     Atualiza um aluno existente
     ---
@@ -89,11 +101,14 @@ def atualizar_aluno(id):
         description: Aluno não encontrado
     """
     data = request.get_json()
+    if not data:
+        return jsonify({'error': 'JSON inválido ou ausente'}), 400
+
     resposta, status = atualizar_aluno(id, data)
     return jsonify(resposta), status
 
 @aluno_bp.route('/<int:id>', methods=['DELETE'])
-def deletar_aluno(id):
+def deletar_aluno_route(id):
     """
     Remove um aluno pelo ID
     ---

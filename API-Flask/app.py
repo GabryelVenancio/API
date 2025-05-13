@@ -13,6 +13,13 @@ sys.path.append(dirname(abspath(__file__)))
 
 app = Flask(__name__)
 
+@app.after_request
+def add_cache_control(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 # Configurações
 app.config['PORT'] = 5000
 app.config['DEBUG'] = True

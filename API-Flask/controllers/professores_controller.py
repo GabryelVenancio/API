@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.professores import (
     criar_professor,
-    listar_professores,
-    buscar_professor_por_id,
+    listar_professores_id,
     atualizar_professor,
     deletar_professor
 )
@@ -26,7 +25,7 @@ def listar_professores():
               items:
                 $ref: '#/components/schemas/Professor'
     """
-    professores = listar_professores()
+    professores = listar_professores_id()
     return jsonify(professores)
 
 @professor_bp.route('', methods=['POST'])

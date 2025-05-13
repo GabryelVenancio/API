@@ -34,7 +34,7 @@ def criar_turma(data: Dict) -> Tuple[Dict, int]:
         db.session.rollback()
         return {'error': str(e)}, 400
 
-def listar_turmas() -> List[Dict]:
+def listar_turmas_id() -> List[Dict]:
     turmas = Turma.query.all()
     return [turma.to_dict() for turma in turmas]
 
