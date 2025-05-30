@@ -5,6 +5,8 @@ from flask import Flask
 from controllers.alunos_controller import aluno_bp
 from controllers.professores_controller import professor_bp
 from controllers.turmas_controller import turma_bp
+from controllers.integracao_reservas_controller import integracao_reserva_bp
+from controllers.integracao_atividades_controller import integracao_atividade_bp
 from config import db
 from flasgger import Swagger
 
@@ -105,6 +107,8 @@ swagger = Swagger(app)
 app.register_blueprint(aluno_bp, url_prefix="/alunos")
 app.register_blueprint(professor_bp, url_prefix="/professores")
 app.register_blueprint(turma_bp, url_prefix="/turmas")
+app.register_blueprint(integracao_reserva_bp, url_prefix="/integracao")
+app.register_blueprint(integracao_atividade_bp, url_prefix="/integracao")
 
 @app.route('/')
 def home():
